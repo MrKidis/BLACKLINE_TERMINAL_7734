@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#020303">
-    <title>BLACKLINE_TERMINAL_7734</title>
+    <title>BLACKLINE_NIGHTSHIFT</title>
     <link rel="stylesheet" href="./src/styles.css">
 </head>
 <body>
@@ -13,82 +13,126 @@
     <div class="crt"></div>
     <div class="vignette"></div>
 
-    <main class="game-shell" id="game-shell">
-        <section class="terminal-frame" aria-label="Blackline recovery terminal">
-            <header class="terminal-topbar">
+    <main id="game-shell" class="night-shell" aria-label="Blackline Nightshift">
+        <section class="office-stage" aria-label="Security office">
+            <header class="night-hud">
                 <div>
-                    <strong>BLACKLINE_TERMINAL_7734</strong>
+                    <strong>BLACKLINE NIGHTSHIFT</strong>
                     <span id="phase-label">BOOT LOCKED</span>
                 </div>
-                <div class="topbar-readouts">
-                    <span id="clock-label">03:00 AM</span>
+                <div class="hud-readouts">
+                    <span id="clock-label">12:00 AM</span>
+                    <span id="power-value">84</span>
                     <span id="voice-label">TTS: ARMED</span>
-                    <span id="loop-label">LOOP 0</span>
+                    <span id="loop-label">NIGHT 1</span>
                 </div>
             </header>
 
-            <div id="terminal-log" class="terminal-log" aria-live="polite"></div>
+            <div id="office-view" class="office-view" data-left-door="open" data-right-door="open">
+                <div class="office-backwall"></div>
+                <div class="office-ceiling"></div>
+                <div class="office-floor"></div>
 
-            <form id="terminal-form" class="terminal-form">
-                <span class="prompt">RECOVERY_TECH_4@blackline:~$</span>
-                <input id="terminal-input" class="terminal-input" type="text" autocomplete="off" spellcheck="false" aria-label="Terminal command">
-            </form>
+                <div class="hall hall-left">
+                    <div class="hall-light"></div>
+                    <div id="left-threat" class="office-threat watcher" aria-hidden="true"></div>
+                    <div id="left-door" class="security-door left"></div>
+                </div>
+
+                <div class="hall hall-right">
+                    <div class="hall-light"></div>
+                    <div id="right-threat" class="office-threat operator" aria-hidden="true"></div>
+                    <div id="right-door" class="security-door right"></div>
+                </div>
+
+                <div class="office-desk">
+                    <div class="desk-monitor">
+                        <span id="camera-label">CAM_00</span>
+                        <small id="entity-label">NO MOTION</small>
+                    </div>
+                    <div class="desk-fan"></div>
+                    <div class="desk-phone"></div>
+                </div>
+
+                <div id="center-threat" class="office-threat shaft" aria-hidden="true"></div>
+                <div id="office-warning" class="office-warning">QUIET</div>
+            </div>
+
+            <div class="office-controls" aria-label="Door and camera controls">
+                <button id="left-door-button" type="button" class="control-button door-control">LEFT DOOR</button>
+                <button id="left-light-button" type="button" class="control-button light-control">LEFT LIGHT</button>
+                <button id="camera-toggle-button" type="button" class="camera-toggle">CAMERAS</button>
+                <button id="right-light-button" type="button" class="control-button light-control">RIGHT LIGHT</button>
+                <button id="right-door-button" type="button" class="control-button door-control">RIGHT DOOR</button>
+            </div>
         </section>
 
-        <aside class="ops-panel" aria-label="Facility state">
-            <section class="ops-block">
-                <h2>Facility</h2>
-                <div class="meter-row"><span>Power</span><meter id="power-meter" min="0" max="100" value="100"></meter><b id="power-value">100</b></div>
-                <div class="meter-row"><span>Sanity</span><meter id="sanity-meter" min="0" max="100" value="100"></meter><b id="sanity-value">100</b></div>
-                <div class="meter-row"><span>Signal</span><meter id="signal-meter" min="0" max="100" value="100"></meter><b id="signal-value">100</b></div>
-                <div class="meter-row"><span>Dread</span><meter id="dread-meter" min="0" max="100" value="0"></meter><b id="dread-value">0</b></div>
-            </section>
-
-            <section class="ops-block">
-                <h2>Map</h2>
-                <div id="map-grid" class="map-grid"></div>
-            </section>
-
-            <section class="ops-block">
-                <h2>Objective</h2>
-                <ol id="objective-list" class="objective-list"></ol>
-            </section>
-
-            <section class="ops-block">
-                <h2>Audio</h2>
-                <label class="toggle-line"><input id="tts-toggle" type="checkbox" checked> Male UK TTS</label>
-                <label class="toggle-line"><input id="ambience-toggle" type="checkbox" checked> Real ambience</label>
-                <select id="voice-select" class="voice-select" aria-label="TTS voice"></select>
-                <small id="voice-status">Looking for Google British English male voice.</small>
-            </section>
-        </aside>
-
-        <aside class="camera-panel" aria-label="Cameras and threat monitor">
+        <section id="camera-panel" class="camera-panel" aria-label="Camera tablet">
             <header class="camera-header">
-                <strong id="camera-label">CAM_00</strong>
-                <span id="entity-label">NO MOTION</span>
+                <strong id="camera-status">REC-BAY / SIGNAL CLEAN</strong>
+                <button id="camera-close-button" type="button">LOWER</button>
             </header>
+
             <div id="camera-feed" class="camera-feed">
                 <div id="camera-room" class="camera-room" aria-hidden="true"></div>
                 <div id="camera-entities" class="camera-entities" aria-hidden="true"></div>
-                <div id="camera-status" class="camera-status">REC-BAY / SIGNAL CLEAN</div>
                 <div class="camera-reticle" aria-hidden="true"></div>
                 <div class="camera-static"></div>
                 <pre id="camera-text">NO CAMERA SELECTED</pre>
             </div>
-            <div id="inventory-list" class="inventory-list"></div>
-            <div id="case-file-list" class="case-file-list"></div>
-            <div id="event-feed" class="event-feed"></div>
+
+            <div id="map-grid" class="camera-grid" aria-label="Camera map"></div>
+        </section>
+
+        <aside class="status-dock" aria-label="Night status">
+            <section class="status-block meters">
+                <h2>Systems</h2>
+                <div class="meter-row"><span>Power</span><meter id="power-meter" min="0" max="100" value="84"></meter><b id="power-readout">84</b></div>
+                <div class="meter-row"><span>Signal</span><meter id="signal-meter" min="0" max="100" value="72"></meter><b id="signal-value">72</b></div>
+                <div class="meter-row"><span>Nerve</span><meter id="sanity-meter" min="0" max="100" value="88"></meter><b id="sanity-value">88</b></div>
+                <div class="meter-row"><span>Threat</span><meter id="dread-meter" min="0" max="100" value="12"></meter><b id="dread-value">12</b></div>
+            </section>
+
+            <section class="status-block objective-block">
+                <h2>Night Rules</h2>
+                <ol id="objective-list" class="objective-list"></ol>
+            </section>
+
+            <section class="status-block audio-block">
+                <h2>Audio</h2>
+                <label class="toggle-line"><input id="tts-toggle" type="checkbox" checked> Male UK TTS</label>
+                <label class="toggle-line"><input id="ambience-toggle" type="checkbox" checked> Ambience</label>
+                <select id="voice-select" class="voice-select" aria-label="TTS voice"></select>
+                <small id="voice-status">Looking for Google British English male voice.</small>
+            </section>
+
+            <section class="status-block feed-block">
+                <h2>Activity</h2>
+                <div id="event-feed" class="event-feed"></div>
+            </section>
         </aside>
+
+        <section class="diagnostics" aria-label="Diagnostics">
+            <button id="diagnostics-toggle" type="button">DIAGNOSTICS</button>
+            <div id="diagnostics-panel" class="diagnostics-panel">
+                <div id="terminal-log" class="terminal-log" aria-live="polite"></div>
+                <form id="terminal-form" class="terminal-form">
+                    <span class="prompt">diag$</span>
+                    <input id="terminal-input" class="terminal-input" type="text" autocomplete="off" spellcheck="false" aria-label="Diagnostic command">
+                </form>
+                <div id="inventory-list" class="inventory-list"></div>
+                <div id="case-file-list" class="case-file-list"></div>
+            </div>
+        </section>
     </main>
 
     <section id="boot-screen" class="boot-screen">
         <div class="boot-copy">
-            <p class="kicker">AUDIO PERMISSION / NIGHT SHIFT 03:00</p>
+            <p class="kicker">NIGHT SHIFT / AUDIO PERMISSION</p>
             <h1>BLACKLINE</h1>
-            <p>The old telephone exchange is still running its emergency AI. Use the terminal, watch the cameras, recover the case files, and get out before the line learns your voice.</p>
-            <button id="start-button" type="button">CONNECT RECOVERY LINE</button>
-            <small>Click once to unlock real downloaded horror audio, ambience loops, and browser TTS.</small>
+            <p>Survive until 6 AM. Watch the cameras, keep the doors powered, check the halls, and do not let the emergency line reach the office.</p>
+            <button id="start-button" type="button">START NIGHT</button>
+            <small>The office remembers every door you close too late.</small>
         </div>
     </section>
 
@@ -97,7 +141,7 @@
             <p id="death-code" class="kicker">CONNECTION LOST</p>
             <h2 id="death-title">SESSION TERMINATED</h2>
             <p id="death-body">The line is still open.</p>
-            <button id="restart-button" type="button">REBOOT LOOP</button>
+            <button id="restart-button" type="button">RESTART NIGHT</button>
         </div>
     </section>
 

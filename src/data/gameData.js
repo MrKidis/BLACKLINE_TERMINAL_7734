@@ -147,11 +147,11 @@ export const cameras = {
 };
 
 export const objectiveText = [
-    "Establish contact without obeying the line.",
-    "Recover PRIME, LINE, CAMERA, and SELF anchors.",
-    "Use cameras and seals to keep entities away.",
-    "Open the service elevator exit.",
-    "Cut the line when it begs."
+    "Survive until 6 AM.",
+    "Use cameras to track movement.",
+    "Close doors only when something is near.",
+    "Use hall lights before wasting power.",
+    "Keep the line out of the office."
 ];
 
 export const entityKinds = {
@@ -159,18 +159,21 @@ export const entityKinds = {
         name: "WATCHER",
         scare: "watcher",
         startCamera: "CAM_01",
+        officeSide: "left",
         killLine: "The camera feed leaned out of the glass."
     },
     operator: {
         name: "THE OPERATOR",
         scare: "operator",
         startCamera: "CAM_03",
+        officeSide: "right",
         killLine: "The handset picked you up."
     },
     shaft: {
         name: "THE SHAFT",
         scare: "shaft",
         startCamera: "CAM_04",
+        officeSide: "center",
         killLine: "The service elevator opened into the room you were in."
     }
 };
@@ -185,6 +188,13 @@ export function createInitialState(loop = 0) {
         phase: "BOOT LOCKED",
         room: "recovery",
         currentCamera: "CAM_00",
+        cameraOpen: false,
+        leftDoorClosed: false,
+        rightDoorClosed: false,
+        leftLightOn: false,
+        rightLightOn: false,
+        survivedNight: false,
+        hourMark: 0,
         seconds: 0,
         power: 84,
         sanity: 88,

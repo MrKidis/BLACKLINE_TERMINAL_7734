@@ -38,17 +38,17 @@ export class GameEngine {
         await this.audio.unlock();
         this.audio.startAmbience();
         this.state.running = true;
-        this.state.phase = "RECOVERY LINE";
+        this.state.phase = "NIGHT ACTIVE";
         this.state.flags.add("contacted");
         this.ui.showBoot(false);
-        this.ui.focusInput();
+        this.ui.focusInput(false);
         this.clearLog();
-        this.log("SYSTEM", "SESSION_START / MAY 06 2026 / RECOVERY_TECH_4", "system");
-        this.log("SYSTEM", "Real audio bank loaded. Terminal defenses online.", "success");
+        this.log("SYSTEM", "NIGHT_START / MAY 06 2026 / SECURITY OFFICE", "system");
+        this.log("SYSTEM", "Office defenses online. Cameras, doors, and hall lights are primary controls.", "success");
         this.lore.unlockMany("start", false);
-        this.log("CASE", "Two case files recovered from boot residue. Type lore.", "event");
-        this.ai("Hello? Say nothing kind until you know which voice is mine. Type help. Then cameras.", "whisper");
-        this.addFeed("Recovery line connected.");
+        this.log("CASE", "Two case files recovered from boot residue. Diagnostics are optional.", "event");
+        this.ai("Security handoff complete. Do not conserve fear. Conserve power.", "whisper");
+        this.addFeed("Night shift started.");
         this.lastFrame = performance.now();
         this.loop();
         this.ui.render();
@@ -59,6 +59,9 @@ export class GameEngine {
         const delta = Math.min(0.05, (now - this.lastFrame) / 1000);
         this.lastFrame = now;
         this.director.update(delta);
+        if (this.state.seconds >= 300 && !this.state.dead && !this.state.escaped) {
+            this.winNight();
+        }
         this.ui.render();
         if (this.state.running && !this.state.dead && !this.state.escaped) {
             this.raf = requestAnimationFrame(this.loop);
@@ -77,15 +80,15 @@ export class GameEngine {
         this.clearLog();
         this.ui.hideDeath();
         this.state.running = true;
-        this.state.phase = "REBOOTED";
+        this.state.phase = "NIGHT ACTIVE";
         this.audio.startAmbience();
-        this.log("SYSTEM", `SESSION_REBOOT / LOOP_${loop} / MEMORY RESIDUE DETECTED`, "system");
+        this.log("SYSTEM", `NIGHT_RESTART / LOOP_${loop} / MEMORY RESIDUE DETECTED`, "system");
         this.lore.unlockMany("start", false);
         this.log("CASE", "Boot residue restored baseline case files. Type lore.", "event");
-        this.ai("You came back. Good. The line hates when you learn.", "whisper");
+        this.ai("You came back. Good. The office remembers what reached the door.", "whisper");
         this.addFeed("Loop restarted.");
         this.lastFrame = performance.now();
-        this.ui.focusInput();
+        this.ui.focusInput(false);
         this.loop();
     }
 
@@ -134,6 +137,63 @@ export class GameEngine {
 
     changeStat(name, delta) {
         this.state[name] = Math.max(0, Math.min(100, this.state[name] + delta));
+    }
+
+    setCamera(cameraId) {
+        if (!this.cameras[cameraId]) {
+            return false;
+        }
+
+        this.state.currentCamera = cameraId;
+        this.state.cameraOpen = true;
+        this.state.flags.add("usedCameras");
+        this.state.cameraNoise = Math.min(100, this.state.cameraNoise + 4);
+        const held = this.director.watchCurrentCamera(8);
+        if (held.length) {
+            this.addFeed(`Camera lock held ${held.map((entity) => entity.kind.toUpperCase()).join(" / ")}.`);
+            this.changeStat("dread", 3);
+        }
+        this.audio.play("clockTick", { volume: 0.22, rate: 1.8 });
+        this.ui.render();
+        return true;
+    }
+
+    toggleCamera(force) {
+        this.state.cameraOpen = typeof force === "boolean" ? force : !this.state.cameraOpen;
+        this.audio.play("clockTick", { volume: 0.26, rate: this.state.cameraOpen ? 0.65 : 1.4 });
+        if (this.state.cameraOpen) {
+            this.state.flags.add("usedCameras");
+            this.director.watchCurrentCamera(6);
+            this.addFeed(`${this.state.currentCamera} raised on monitor.`);
+        } else {
+            this.addFeed("Camera tablet lowered.");
+        }
+        this.ui.render();
+    }
+
+    toggleDoor(side) {
+        const key = side === "left" ? "leftDoorClosed" : "rightDoorClosed";
+        this.state[key] = !this.state[key];
+        this.state.flags.add("usedDefenses");
+        this.audio.play("operatorJump", { volume: 0.18, rate: this.state[key] ? 0.48 : 0.72 });
+        this.addFeed(`${side.toUpperCase()} door ${this.state[key] ? "closed" : "opened"}.`);
+        this.ui.render();
+    }
+
+    toggleLight(side) {
+        const key = side === "left" ? "leftLightOn" : "rightLightOn";
+        this.state[key] = !this.state[key];
+        this.state.flags.add("usedDefenses");
+        this.audio.play("clockTick", { volume: 0.38, rate: this.state[key] ? 2.2 : 1.2 });
+        const threats = this.director.officeThreats().filter((entity) => {
+            const entitySide = entity.kind === "watcher" ? "left" : "right";
+            return entitySide === side || (side === "right" && entity.kind === "shaft");
+        });
+        if (this.state[key] && threats.length) {
+            this.log("OFFICE", `${threats.map((entity) => entity.kind.toUpperCase()).join(" / ")} visible in the ${side} light.`, "error");
+            this.changeStat("dread", 9);
+        }
+        this.ui.render();
     }
 
     recoverAnchor(anchor, message) {
@@ -206,9 +266,27 @@ export class GameEngine {
             this.kill("The signal collapsed inward and used your skull as a receiver.", "operator", "SIGNAL LOSS");
         } else if (this.state.dread >= 100) {
             this.kill("Dread reached the glass before your hands reached the keyboard.", "watcher", "CONTACT");
-        } else if (this.state.seconds >= 180 && !this.state.finalChoice) {
-            this.kill("Six AM arrived, but outside did not.", "shaft", "TIMEOUT");
         }
+    }
+
+    winNight() {
+        this.state.escaped = true;
+        this.state.running = false;
+        this.state.survivedNight = true;
+        this.state.phase = "6 AM";
+        this.state.cameraOpen = false;
+        cancelAnimationFrame(this.raf);
+        this.audio.stopAmbience();
+        this.log("SYSTEM", "06:00 reached. Blackline emergency line severed until tomorrow night.", "success");
+        this.ai("Six AM. The doors can open. Do not thank the building.", "line");
+        this.addFeed("Night survived.");
+        this.ui.lockInput();
+        this.ui.showDeath({
+            code: "6 AM",
+            title: "NIGHT SURVIVED",
+            body: "The office lights warmed up. Something in the cameras stopped pretending to be far away."
+        });
+        this.ui.render();
     }
 
     kill(body, scareType, code = "SESSION LOST") {

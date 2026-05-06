@@ -2,9 +2,9 @@ import { cameras, entityKinds } from "../data/gameData.js";
 import { cameraEntityProfiles, cameraScenes, cameraSlot } from "../data/cameraScenes.js";
 
 const cameraRoutes = {
-    watcher: ["CAM_01", "CAM_00", "CAM_02", "CAM_04"],
-    operator: ["CAM_03", "CAM_00", "CAM_03", "CAM_04"],
-    shaft: ["CAM_04", "CAM_02", "CAM_00", "CAM_04"]
+    watcher: ["CAM_01", "CAM_02", "CAM_00", "DOOR_LEFT"],
+    operator: ["CAM_03", "CAM_02", "CAM_00", "DOOR_RIGHT"],
+    shaft: ["CAM_04", "CAM_02", "CAM_00", "DOOR_CENTER"]
 };
 
 const poses = ["waiting", "leaning", "staring", "crossing", "closer"];
@@ -51,20 +51,26 @@ export class AIDirector {
             this.randomIncident();
             this.storyPressure();
         }
+
+        this.checkDoorAttacks();
     }
 
     nextEventDelay() {
-        const dread = this.engine.state.dread;
-        return Math.max(3.4, 8.2 - dread / 18 + Math.random() * 3);
+        const state = this.engine.state;
+        const hourPressure = Math.floor(state.seconds / 50) * 0.35;
+        return Math.max(2.1, 7.6 - state.dread / 20 - hourPressure + Math.random() * 2.4);
     }
 
     resourceTick() {
         const state = this.engine.state;
-        const sealedCost = state.seals.size * 1.9;
-        this.engine.changeStat("power", -(0.9 + sealedCost));
-        this.engine.changeStat("signal", -0.55);
-        this.engine.changeStat("sanity", state.flags.has("hidden") ? 0.9 : -0.48);
-        this.engine.changeStat("dread", state.flags.has("hidden") ? -1.8 : 1.15);
+        const doorCost = Number(state.leftDoorClosed) * 1.55 + Number(state.rightDoorClosed) * 1.55;
+        const lightCost = Number(state.leftLightOn) * 1.8 + Number(state.rightLightOn) * 1.8;
+        const cameraCost = state.cameraOpen ? 0.85 : 0;
+        const contactCost = this.officeThreats().length * 0.9;
+        this.engine.changeStat("power", -(0.42 + doorCost + lightCost + cameraCost));
+        this.engine.changeStat("signal", state.cameraOpen ? -1.1 : -0.34);
+        this.engine.changeStat("sanity", state.cameraOpen ? -0.1 : -0.42 - contactCost);
+        this.engine.changeStat("dread", this.officeThreats().length ? 4.8 : state.cameraOpen ? -0.35 : 0.92);
         state.flags.delete("hidden");
         this.engine.checkFailure();
     }
@@ -73,10 +79,9 @@ export class AIDirector {
         const state = this.engine.state;
         const entity = this.pickEntity();
         const route = cameraRoutes[entity.kind];
-        const index = route.indexOf(entity.camera);
+        const index = Math.max(0, route.indexOf(entity.camera));
         const next = route[Math.min(route.length - 1, index + 1)];
-        const room = this.roomForCamera(next);
-        const sealed = room && state.seals.has(room);
+        const officeSide = entityKinds[entity.kind].officeSide;
 
         if (entity.freezeUntil > state.seconds) {
             entity.pose = "stared";
@@ -86,14 +91,12 @@ export class AIDirector {
             return;
         }
 
-        if (sealed) {
-            entity.pressure = Math.max(0, entity.pressure - 18);
-            entity.pose = "recoiling";
-            entity.offsetX = (Math.random() - 0.5) * 12;
-            entity.offsetY = -6;
-            this.engine.log("SYSTEM", `${entityKinds[entity.kind].name} hit the sealed ${room.toUpperCase()} route and backed away.`, "event");
-            this.engine.audio.play("operatorJump", { volume: 0.28, rate: 0.55 });
-            this.engine.changeStat("power", -4);
+        if (this.isOfficeNode(entity.camera)) {
+            if (this.isDoorClosedFor(officeSide)) {
+                this.repelEntity(entity, "The closed door shook once and the shape backed into the camera feed.");
+                return;
+            }
+            this.engine.kill(entityKinds[entity.kind].killLine, entityKinds[entity.kind].scare, entityKinds[entity.kind].name);
             return;
         }
 
@@ -106,7 +109,21 @@ export class AIDirector {
         state.cameraNoise = Math.min(100, state.cameraNoise + 12);
         this.engine.addFeed(`${entityKinds[entity.kind].name} moved to ${next}.`);
 
-        if (next === state.currentCamera) {
+        if (this.isOfficeNode(next)) {
+            entity.attackAt = state.seconds + Math.max(2.4, 6.4 - entity.pressure / 22);
+            entity.pose = "door";
+            this.engine.addFeed(`${entityKinds[entity.kind].name} reached the ${officeSide.toUpperCase()} office approach.`);
+            this.engine.log("OFFICE", `${entityKinds[entity.kind].name} is at ${officeSide === "center" ? "the blind spot" : `the ${officeSide} hall`}.`, "error");
+            this.engine.changeStat("dread", 17);
+            if (this.isDoorClosedFor(officeSide)) {
+                this.repelEntity(entity, "It hit the door and vanished from the hall light.");
+            } else {
+                this.engine.audio.play("ghostApproach", { volume: 0.52, rate: 0.74 });
+            }
+            return;
+        }
+
+        if (next === state.currentCamera && state.cameraOpen) {
             this.engine.log("CAMERA", `${entityKinds[entity.kind].name} entered the live feed.`, "error");
             this.engine.changeStat("dread", 10);
             if (entity.pressure > 45) {
@@ -115,13 +132,62 @@ export class AIDirector {
         }
 
         if (next === "CAM_00" && entity.pressure > 50) {
-            this.engine.log("SYSTEM", `${entityKinds[entity.kind].name} is at the recovery bay door.`, "error");
+            this.engine.log("SYSTEM", `${entityKinds[entity.kind].name} is one move from the office.`, "error");
             this.engine.changeStat("dread", 15);
         }
 
         if (entity.pressure >= 92) {
             this.engine.kill(entityKinds[entity.kind].killLine, entityKinds[entity.kind].scare, entityKinds[entity.kind].name);
         }
+    }
+
+    checkDoorAttacks() {
+        const state = this.engine.state;
+        this.officeThreats().forEach((entity) => {
+            const side = entityKinds[entity.kind].officeSide;
+            if (this.isDoorClosedFor(side)) {
+                this.repelEntity(entity, "Door contact blocked.");
+                return;
+            }
+            if ((entity.attackAt || 0) <= state.seconds) {
+                this.engine.kill(entityKinds[entity.kind].killLine, entityKinds[entity.kind].scare, entityKinds[entity.kind].name);
+            }
+        });
+    }
+
+    repelEntity(entity, message) {
+        const route = cameraRoutes[entity.kind];
+        const retreatIndex = Math.max(0, Math.min(1, Math.floor(Math.random() * (route.length - 2))));
+        entity.camera = route[retreatIndex];
+        entity.pressure = Math.max(4, entity.pressure - 28);
+        entity.attackAt = 0;
+        entity.pose = "recoiling";
+        entity.offsetX = (Math.random() - 0.5) * 12;
+        entity.offsetY = -6;
+        this.engine.addFeed(`${entityKinds[entity.kind].name} retreated to ${entity.camera}.`);
+        this.engine.log("OFFICE", message, "event");
+        this.engine.audio.play("operatorJump", { volume: 0.22, rate: 0.54 });
+        this.engine.changeStat("power", -2.5);
+        this.engine.changeStat("dread", -5);
+    }
+
+    isOfficeNode(node) {
+        return /^DOOR_/.test(node);
+    }
+
+    isDoorClosedFor(side) {
+        const state = this.engine.state;
+        if (side === "left") {
+            return state.leftDoorClosed;
+        }
+        if (side === "right" || side === "center") {
+            return state.rightDoorClosed;
+        }
+        return false;
+    }
+
+    officeThreats() {
+        return this.engine.state.entities.filter((entity) => this.isOfficeNode(entity.camera));
     }
 
     cameraLifeTick() {
@@ -169,6 +235,13 @@ export class AIDirector {
         state.cameraNoise = Math.min(100, state.cameraNoise + 15);
         this.engine.addFeed(`Visual lock held ${entityKinds[kind].name} in ${state.currentCamera}.`);
         return entity;
+    }
+
+    watchCurrentCamera(strength = 7) {
+        return this.engine.state.entities
+            .filter((entity) => entity.camera === this.engine.state.currentCamera)
+            .map((entity) => this.watchEntity(entity.kind, strength))
+            .filter(Boolean);
     }
 
     poseFor(pressure) {
@@ -282,7 +355,7 @@ export class AIDirector {
         const state = this.engine.state;
         const entities = state.entities
             .filter((entity) => entity.camera === state.currentCamera);
-        const scene = cameraScenes[state.currentCamera];
+        const scene = cameraScenes[state.currentCamera] || cameraScenes.CAM_00;
         const visuals = entities.map((entity) => {
             const slot = cameraSlot(state.currentCamera, entity.kind, entity.pressure);
             return {
