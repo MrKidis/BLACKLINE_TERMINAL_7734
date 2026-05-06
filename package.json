@@ -1,0 +1,11 @@
+{
+  "name": "blackline_terminal_7734",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "description": "Psychological horror terminal game engine with local AI director, real audio assets, TTS, cameras, and animated jumpscares.",
+  "scripts": {
+    "dev": "python -m http.server 8787 --bind 127.0.0.1",
+    "check": "node --check src/main.js"
+  }
+}
