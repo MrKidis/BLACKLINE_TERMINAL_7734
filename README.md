@@ -18,7 +18,13 @@ http://127.0.0.1:8787/index.html
 
 ## GitHub Pages
 
-The public Pages build deploys from `main`:
+The static site is published to the `gh-pages` branch. In GitHub, enable Pages with:
+
+- Source: `Deploy from a branch`
+- Branch: `gh-pages`
+- Folder: `/ (root)`
+
+After GitHub finishes publishing, the game URL is:
 
 ```text
 https://mrkidis.github.io/BLACKLINE_TERMINAL_7734/
