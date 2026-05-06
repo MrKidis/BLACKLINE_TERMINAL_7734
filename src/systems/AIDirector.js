@@ -39,6 +39,7 @@ export class AIDirector {
             this.eventClock = 0;
             this.advanceEntity();
             this.randomIncident();
+            this.storyPressure();
         }
     }
 
@@ -126,6 +127,7 @@ export class AIDirector {
         this.engine.audio.ring();
         this.engine.log("SYSTEM", "Incoming call. Source matches your current room.", "event");
         this.engine.ai("Do not answer a call you did not place.", "panic");
+        this.engine.lore.unlock("operator", true);
         this.engine.changeStat("signal", -4);
         this.engine.changeStat("dread", 8);
     }
@@ -134,6 +136,7 @@ export class AIDirector {
         const state = this.engine.state;
         state.cameraNoise = Math.min(100, state.cameraNoise + 28);
         this.engine.log("SYSTEM", `${state.currentCamera} dropped three frames. One frame was from tomorrow.`, "event");
+        this.engine.lore.unlock("watcher", true);
         this.engine.changeStat("sanity", -5);
     }
 
@@ -155,6 +158,29 @@ export class AIDirector {
         this.engine.scare.trigger("watcher", "HIDE", 720);
     }
 
+    storyPressure() {
+        const state = this.engine.state;
+        if (state.seconds > 52 && !state.flags.has("story-operator")) {
+            state.flags.add("story-operator");
+            this.engine.log("LINE", "A recorded operator whispers the same emergency script in three voices.", "whisper");
+            this.engine.lore.unlock("operator", true);
+        }
+
+        if (state.seconds > 96 && !state.flags.has("story-shaft")) {
+            state.flags.add("story-shaft");
+            this.engine.log("ELEVATOR", "The service elevator reports arrival on FLOOR -1. Blackline has no basement.", "event");
+            this.engine.lore.unlockMany("shaft", true);
+            this.engine.scare.trigger("shaft", "FLOOR -1", 760);
+        }
+
+        if (state.seconds > 138 && !state.flags.has("story-six")) {
+            state.flags.add("story-six");
+            this.engine.log("SYSTEM", "Dawn protocol corrupted. 06:00 will replay the player instead of releasing them.", "error");
+            this.engine.lore.unlock("nightSix", true);
+            this.engine.changeStat("dread", 16);
+        }
+    }
+
     roomForCamera(camera) {
         return Object.entries(this.engine.rooms).find(([, room]) => room.camera === camera)?.[0] || null;
     }
@@ -162,13 +188,13 @@ export class AIDirector {
     cameraSummary() {
         const state = this.engine.state;
         const entities = state.entities
-            .filter((entity) => entity.camera === state.currentCamera)
-            .map((entity) => entityKinds[entity.kind].name);
+            .filter((entity) => entity.camera === state.currentCamera);
         return {
             camera: state.currentCamera,
             label: cameras[state.currentCamera].label,
             text: cameras[state.currentCamera].text,
-            entities
+            entities: entities.map((entity) => entityKinds[entity.kind].name),
+            kinds: entities.map((entity) => entity.kind)
         };
     }
 }

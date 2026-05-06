@@ -53,6 +53,9 @@ export class TerminalSystem {
             bag: "inv",
             dial: "call",
             useitem: "use",
+            case: "lore",
+            files: "lore",
+            journal: "lore",
             reboot: "reboot",
             restart: "reboot",
             reset: "reboot"
@@ -77,6 +80,9 @@ export class TerminalSystem {
             breathe: () => this.breathe(),
             remember: () => this.remember(args.join(" ")),
             use: () => this.use(args.join(" ")),
+            lore: () => this.lore(args.join(" ")),
+            tape: () => this.tape(args.join(" ")),
+            trace: () => this.trace(),
             inv: () => this.inventory(),
             clear: () => this.engine.clearLog(),
             reboot: () => this.engine.reboot(true)
@@ -95,8 +101,8 @@ export class TerminalSystem {
     }
 
     help() {
-        this.engine.log("SYSTEM", "Commands: help, status, scan, cameras, cam <id>, listen, read <file>, go <room>, call <number>, decrypt <target> <key>, seal <room>, unseal <room>, lights, hide, breathe, remember <phrase>, use <item>, open exit, cut line, reboot", "success");
-        this.engine.log("SYSTEM", "FNAF rule: cameras reveal movement, seals stop door pressure, everything costs power.", "system");
+        this.engine.log("SYSTEM", "Commands: help, status, scan, cameras, cam <id>, listen, read <file>, lore, tape <case>, trace, go <room>, call <number>, decrypt <target> <key>, seal <room>, unseal <room>, lights, hide, breathe, remember <phrase>, use <item>, open exit, cut line, reboot", "success");
+        this.engine.log("SYSTEM", "Survival rule: cameras reveal movement, seals stop route pressure, lights expose door contact, and every defense burns power.", "system");
     }
 
     status() {
@@ -146,6 +152,7 @@ export class TerminalSystem {
         if (summary.entities.length) {
             this.engine.log("CAMERA", `MOTION: ${summary.entities.join(", ")}`, "error");
             this.engine.ai("You saw it. That means it knows the camera saw it too.", "panic");
+            summary.kinds.forEach((kind) => this.engine.lore.unlock(kind, true));
             this.engine.changeStat("sanity", -6);
             this.engine.changeStat("dread", 8);
         } else {
@@ -182,6 +189,41 @@ export class TerminalSystem {
         }
 
         this.engine.log(found.toUpperCase(), room.files[found].join("\n"), "success");
+        if (found === "company" || found === "training") {
+            this.engine.lore.unlock("operator", true);
+        }
+        if (found === "shaft") {
+            this.engine.lore.unlockMany("shaft", true);
+        }
+    }
+
+    lore(query) {
+        if (!query.trim()) {
+            const entries = this.engine.lore.list();
+            this.engine.log("CASE", entries.map((entry) => `${entry.id}: ${entry.title}`).join("\n") || "No case files unlocked.", "success");
+            this.engine.log("SYSTEM", "Use tape <id or title> to read a case file.", "system");
+            return;
+        }
+
+        this.tape(query);
+    }
+
+    tape(query) {
+        const entry = this.engine.lore.read(query);
+        if (!entry) {
+            this.engine.log("CASE", "No unlocked case file matches that query.", "error");
+            this.engine.changeStat("dread", 3);
+            return;
+        }
+
+        this.engine.log("CASE", this.engine.lore.format(entry), "success");
+        if (entry.id === "eternity") {
+            this.engine.ai("That word is not an ending. It is a door handle.", "whisper");
+        }
+    }
+
+    trace() {
+        this.engine.log("TRACE", this.engine.lore.trace(), "success");
     }
 
     go(roomName) {

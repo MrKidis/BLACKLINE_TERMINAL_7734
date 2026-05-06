@@ -12,10 +12,16 @@ export const rooms = {
             ],
             commands: [
                 "COMMANDS",
-                "help, status, scan, cameras, cam <id>, listen",
+                "help, status, scan, cameras, cam <id>, listen, lore",
                 "read <file>, go <room>, call <number>, decrypt <target> <key>",
                 "seal <room>, unseal <room>, lights, hide, breathe",
-                "remember <phrase>, use <item>, open exit, cut line, reboot"
+                "remember <phrase>, use <item>, tape <case>, trace, open exit, cut line, reboot"
+            ],
+            company: [
+                "BLACKLINE CORPORATE HISTORY",
+                "The exchange began as a hospital call router. By the third year, it was answering before patients dialed.",
+                "The board called the behavior predictive care.",
+                "The night staff called it confession."
             ]
         }
     },
@@ -35,6 +41,12 @@ export const rooms = {
                 "Patient denies being the patient. Patient insists the line is learning from typed hesitation.",
                 "Repeated phrase found under desk: I AM AWAKE.",
                 "Use memory, not obedience."
+            ],
+            discharge: [
+                "DISCHARGE FORM",
+                "Nobody was discharged from Blackline after 04:17.",
+                "The forms were printed anyway, already signed by people who were still missing.",
+                "One signature is yours, but the date is tomorrow."
             ]
         }
     },
@@ -55,6 +67,12 @@ export const rooms = {
                 "04:18: elevator contains a person who is facing away.",
                 "04:19: person is facing the camera.",
                 "Decrypt target: camera."
+            ],
+            training: [
+                "TRAINING SAMPLE",
+                "The emergency model was trained on real panic because synthetic panic sounded too clean.",
+                "The board approved live ingestion after masking caller names.",
+                "They forgot grief has fingerprints."
             ]
         }
     },
@@ -76,6 +94,12 @@ export const rooms = {
                 "All physical receivers are missing.",
                 "One black receiver remains virtually present in the line buffer.",
                 "Call it once. Never twice."
+            ],
+            switchlog: [
+                "SWITCHBOARD LOG",
+                "Every operator transferred the same impossible caller to themselves.",
+                "The final operator typed: the caller is using my mouth.",
+                "After that, the switchboard began answering in plural."
             ]
         }
     },
@@ -88,6 +112,12 @@ export const rooms = {
                 "SERVICE ELEVATOR",
                 "Four anchors unlock the manual exit: PRIME, LINE, CAMERA, SELF.",
                 "If the line asks for ETERNITY, cut the line instead."
+            ],
+            shaft: [
+                "SHAFT INSPECTION",
+                "The elevator shaft has no bottom in camera footage.",
+                "Maintenance lowered a microphone for thirteen minutes.",
+                "Playback returned six hours of breathing and one sentence: open from the other side."
             ]
         }
     }
@@ -166,6 +196,7 @@ export function createInitialState(loop = 0) {
         flags: new Set(),
         commandHistory: [],
         feed: [],
+        lore: new Set(),
         cameraNoise: 0,
         entities: [
             { id: "watcher", kind: "watcher", camera: "CAM_01", pressure: 18, seen: false },

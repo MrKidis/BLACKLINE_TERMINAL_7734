@@ -34,6 +34,7 @@ const selectors = {
     cameraText: "#camera-text",
     cameraGhost: "#camera-ghost",
     inventory: "#inventory-list",
+    caseFiles: "#case-file-list",
     feed: "#event-feed"
 };
 
@@ -96,7 +97,7 @@ export class TerminalUI {
         const candidates = [
             "help", "status", "scan", "cameras", "listen", "hide", "breathe", "lights",
             "call 7734", "decrypt prime 13", "decrypt camera 0417", "remember i am awake",
-            "use fuse", "open exit", "cut line", "reboot",
+            "use fuse", "lore", "trace", "tape orientation", "tape threshold", "open exit", "cut line", "reboot",
             ...Object.keys(room.files).map((file) => `read ${file}`),
             ...room.exits.map((exit) => `go ${exit}`),
             ...Object.keys(cameras).map((camera) => `cam ${camera}`)
@@ -159,6 +160,7 @@ export class TerminalUI {
         this.renderObjectives();
         this.renderCamera();
         this.renderInventory();
+        this.renderCaseFiles();
         this.renderVoice();
     }
 
@@ -247,7 +249,7 @@ export class TerminalUI {
         this.els.entityLabel.textContent = summary.entities.length ? summary.entities.join(" / ") : `NO MOTION / NOISE ${noise}`;
         this.els.cameraText.textContent = summary.text;
         this.els.cameraGhost.className = `camera-ghost ${summary.entities.length ? "visible" : ""}`;
-        this.els.cameraGhost.dataset.kind = summary.entities[0] || "";
+        this.els.cameraGhost.dataset.kind = summary.kinds[0] || "";
     }
 
     renderInventory() {
@@ -255,6 +257,20 @@ export class TerminalUI {
         const items = [...this.engine.state.inventory].map((item) => item.replace(/_/g, " ").toUpperCase()).join(" / ");
         this.els.inventory.innerHTML = `<strong>ANCHORS</strong><span>${anchors || "NONE"}</span><strong>ITEMS</strong><span>${items || "EMPTY"}</span>`;
         this.els.feed.innerHTML = this.engine.state.feed.map((item) => `<p>${this.escape(item)}</p>`).join("");
+    }
+
+    renderCaseFiles() {
+        const entries = this.engine.lore.list();
+        this.els.caseFiles.innerHTML = entries.length
+            ? entries.slice(-6).map((entry) => `<button type="button" data-tape="${entry.id}">${this.escape(entry.title)}</button>`).join("")
+            : "<span>No case files recovered.</span>";
+
+        this.els.caseFiles.querySelectorAll("[data-tape]").forEach((button) => {
+            button.addEventListener("click", () => {
+                this.els.input.value = `tape ${button.dataset.tape}`;
+                this.els.input.focus();
+            });
+        });
     }
 
     focusInput() {

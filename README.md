@@ -21,12 +21,14 @@ http://127.0.0.1:8787/index.html
 - Use `help`, `scan`, `cameras`, and `cam <id>` to learn the facility.
 - Use `seal <room>`, `unseal <room>`, `lights`, `hide`, and `breathe` to survive entity pressure.
 - Recover anchors with `decrypt prime 13`, `call 7734`, `decrypt camera 0417`, and `remember i am awake`.
+- Use `lore`, `tape <case>`, and `trace` to read unlocked case files and understand why the line wants out.
 - Reach the elevator, run `open exit`, then `cut line`.
 
 ## Engine Layout
 
 - `src/core/GameEngine.js` owns game state, loop, failure, escape, and system wiring.
 - `src/systems/TerminalSystem.js` parses commands and applies game rules.
+- `src/systems/LoreSystem.js` unlocks case files, tape transcripts, and trace evidence.
 - `src/systems/AIDirector.js` moves threats, creates random events, and drives FNAF-style pressure.
 - `src/systems/AudioEngine.js` loads and plays real downloaded ambience and scare sounds.
 - `src/systems/SpeechDirector.js` locks to Google British English when the browser exposes it. If the browser does not expose that voice, it forces `en-GB` speech so the game does not go silent.

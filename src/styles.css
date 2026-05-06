@@ -414,7 +414,39 @@ meter::-webkit-meter-optimum-value {
     box-shadow: 42px 0 0 var(--white);
 }
 
+.camera-ghost[data-kind="operator"]::before {
+    border-radius: 4px;
+    transform: skewX(-8deg);
+}
+
+.camera-ghost[data-kind="operator"]::after {
+    width: 16px;
+    height: 72px;
+    top: 44px;
+    box-shadow: 48px 0 0 var(--white);
+}
+
+.camera-ghost[data-kind="shaft"] {
+    width: 150px;
+    height: 220px;
+    left: calc(50% - 75px);
+}
+
+.camera-ghost[data-kind="shaft"]::before {
+    border-radius: 2px;
+    background: linear-gradient(90deg, #151515 0 28%, #010000 28% 72%, #151515 72%);
+}
+
+.camera-ghost[data-kind="shaft"]::after {
+    width: 20px;
+    height: 96px;
+    top: 42px;
+    left: 46px;
+    box-shadow: 48px 0 0 var(--white);
+}
+
 .inventory-list,
+.case-file-list,
 .event-feed {
     padding: 12px 14px;
     border-bottom: 1px solid rgba(94, 255, 164, 0.13);
@@ -430,6 +462,28 @@ meter::-webkit-meter-optimum-value {
 
 .inventory-list span {
     min-height: 18px;
+}
+
+.case-file-list {
+    grid-template-columns: 1fr;
+}
+
+.case-file-list::before {
+    content: "CASE FILES";
+    color: var(--white);
+    font-weight: 700;
+}
+
+.case-file-list button {
+    min-height: 30px;
+    padding: 6px 8px;
+    color: var(--cyan);
+    text-align: left;
+    font-size: 10px;
+}
+
+.case-file-list span {
+    color: var(--dim);
 }
 
 .event-feed p {

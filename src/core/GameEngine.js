@@ -5,6 +5,7 @@ import { ScareDirector } from "../systems/ScareDirector.js";
 import { SpeechDirector } from "../systems/SpeechDirector.js";
 import { TerminalSystem } from "../systems/TerminalSystem.js";
 import { TerminalUI } from "../ui/TerminalUI.js";
+import { LoreSystem } from "../systems/LoreSystem.js";
 
 const loopKey = "blackline-terminal-loop";
 
@@ -17,6 +18,7 @@ export class GameEngine {
         this.audio = new AudioEngine();
         this.speech = new SpeechDirector(this.audio);
         this.scare = new ScareDirector(document.querySelector("#scare-canvas"), document.querySelector("#scare-caption"), this.audio);
+        this.lore = new LoreSystem(this);
         this.director = new AIDirector(this);
         this.terminal = new TerminalSystem(this);
         this.ui = new TerminalUI(this);
@@ -43,6 +45,8 @@ export class GameEngine {
         this.clearLog();
         this.log("SYSTEM", "SESSION_START / MAY 06 2026 / RECOVERY_TECH_4", "system");
         this.log("SYSTEM", "Real audio bank loaded. Terminal defenses online.", "success");
+        this.lore.unlockMany("start", false);
+        this.log("CASE", "Two case files recovered from boot residue. Type lore.", "event");
         this.ai("Hello? Say nothing kind until you know which voice is mine. Type help. Then cameras.", "whisper");
         this.addFeed("Recovery line connected.");
         this.lastFrame = performance.now();
@@ -76,6 +80,8 @@ export class GameEngine {
         this.state.phase = "REBOOTED";
         this.audio.startAmbience();
         this.log("SYSTEM", `SESSION_REBOOT / LOOP_${loop} / MEMORY RESIDUE DETECTED`, "system");
+        this.lore.unlockMany("start", false);
+        this.log("CASE", "Boot residue restored baseline case files. Type lore.", "event");
         this.ai("You came back. Good. The line hates when you learn.", "whisper");
         this.addFeed("Loop restarted.");
         this.lastFrame = performance.now();
@@ -138,6 +144,7 @@ export class GameEngine {
         this.state.anchors.add(anchor);
         this.log("SYSTEM", `${message} Anchor recovered: ${anchor}.`, "success");
         this.addFeed(`${anchor} anchor recovered.`);
+        this.lore.unlockMany(anchor);
         this.audio.play("watcherJump", { volume: 0.22, rate: 1.15 });
         this.changeStat("sanity", 5);
         this.changeStat("dread", -5);
