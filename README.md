@@ -16,6 +16,14 @@ Then open:
 http://127.0.0.1:8787/index.html
 ```
 
+## GitHub Pages
+
+The public Pages build deploys from `main`:
+
+```text
+https://mrkidis.github.io/BLACKLINE_TERMINAL_7734/
+```
+
 ## Core Loop
 
 - Use `help`, `scan`, `cameras`, and `cam <id>` to learn the facility.
