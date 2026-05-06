@@ -199,9 +199,9 @@ export function createInitialState(loop = 0) {
         lore: new Set(),
         cameraNoise: 0,
         entities: [
-            { id: "watcher", kind: "watcher", camera: "CAM_01", pressure: 18, seen: false },
-            { id: "operator", kind: "operator", camera: "CAM_03", pressure: 10, seen: false },
-            { id: "shaft", kind: "shaft", camera: "CAM_04", pressure: 6, seen: false }
+            { id: "watcher", kind: "watcher", camera: "CAM_01", pressure: 18, seen: false, pose: "waiting", offsetX: 0, offsetY: 0, freezeUntil: 0, lastMoved: 0 },
+            { id: "operator", kind: "operator", camera: "CAM_03", pressure: 10, seen: false, pose: "waiting", offsetX: 0, offsetY: 0, freezeUntil: 0, lastMoved: 0 },
+            { id: "shaft", kind: "shaft", camera: "CAM_04", pressure: 6, seen: false, pose: "waiting", offsetX: 0, offsetY: 0, freezeUntil: 0, lastMoved: 0 }
         ]
     };
 }

@@ -1,6 +1,6 @@
 # BLACKLINE_TERMINAL_7734
 
-Psychological horror terminal game prototype with a modular browser game engine, real downloaded horror audio, local AI director, camera pressure, terminal commands, scary browser TTS, animated jumpscares, and escape/reboot loops.
+Psychological horror terminal game prototype with a modular browser game engine, real downloaded horror audio, local AI director, live camera scenes, moving threat entities, terminal commands, scary male UK browser TTS, animated canvas jumpscares, and escape/reboot loops.
 
 ## Run
 
@@ -32,7 +32,7 @@ https://mrkidis.github.io/BLACKLINE_TERMINAL_7734/
 
 ## Core Loop
 
-- Use `help`, `scan`, `cameras`, and `cam <id>` to learn the facility.
+- Use `help`, `scan`, `cameras`, and `cam <id>` to watch live surveillance scenes. Visual contact now locks entities briefly and changes their pressure.
 - Use `seal <room>`, `unseal <room>`, `lights`, `hide`, and `breathe` to survive entity pressure.
 - Recover anchors with `decrypt prime 13`, `call 7734`, `decrypt camera 0417`, and `remember i am awake`.
 - Use `lore`, `tape <case>`, and `trace` to read unlocked case files and understand why the line wants out.
@@ -45,8 +45,9 @@ https://mrkidis.github.io/BLACKLINE_TERMINAL_7734/
 - `src/systems/LoreSystem.js` unlocks case files, tape transcripts, and trace evidence.
 - `src/systems/AIDirector.js` moves threats, creates random events, and drives FNAF-style pressure.
 - `src/systems/AudioEngine.js` loads and plays real downloaded ambience and scare sounds.
-- `src/systems/SpeechDirector.js` locks to Google British English when the browser exposes it. If the browser does not expose that voice, it forces `en-GB` speech so the game does not go silent.
+- `src/systems/SpeechDirector.js` locks to the Google British English male voice when the browser exposes it. If the browser does not expose that voice, it forces lower-pitch `en-GB` speech so the game does not go silent.
 - `src/systems/ScareDirector.js` draws animated jumpscares on canvas.
 - `src/ui/TerminalUI.js` renders the terminal, HUD, camera feed, objectives, and voice controls.
+- `src/data/cameraScenes.js` defines camera-room geometry, entity positions, and surveillance contact behavior.
 - `docs/AUDIO_CREDITS.md` documents every bundled audio source and license.
 

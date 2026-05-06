@@ -1,3 +1,5 @@
+import { entityKinds } from "../data/gameData.js";
+
 export class TerminalSystem {
     constructor(engine) {
         this.engine = engine;
@@ -132,7 +134,7 @@ export class TerminalSystem {
     cameras() {
         const ids = Object.values(this.engine.rooms).map((room) => `${room.camera}:${room.label}`).join("  ");
         this.engine.log("SYSTEM", `CAMERAS: ${ids}`, "success");
-        this.engine.log("SYSTEM", "Use cam CAM_01, cam CAM_02, cam CAM_03, cam CAM_04. Cameras raise signal noise but lower uncertainty.", "system");
+        this.engine.log("SYSTEM", "Use cam CAM_01, cam CAM_02, cam CAM_03, cam CAM_04. Visual contact locks entities briefly, raises feed noise, and buys time.", "system");
     }
 
     cam(id = "") {
@@ -145,17 +147,23 @@ export class TerminalSystem {
 
         const state = this.engine.state;
         state.currentCamera = target;
-        state.cameraNoise = Math.max(0, state.cameraNoise - 18);
+        state.cameraNoise = Math.max(0, state.cameraNoise - 14);
         const summary = this.engine.director.cameraSummary();
-        this.engine.log("CAMERA", `${summary.camera} / ${summary.label}: ${summary.text}`, "success");
+        this.engine.log("CAMERA", `${summary.camera} / ${summary.label}: ${summary.text}`, summary.visuals.length ? "event" : "success");
 
-        if (summary.entities.length) {
-            this.engine.log("CAMERA", `MOTION: ${summary.entities.join(", ")}`, "error");
-            this.engine.ai("You saw it. That means it knows the camera saw it too.", "panic");
+        if (summary.visuals.length) {
+            const held = summary.visuals
+                .map((visual) => this.engine.director.watchEntity(visual.kind, 11))
+                .filter(Boolean)
+                .map((entity) => `${entityKinds[entity.kind].name} HELD`);
+            this.engine.log("CAMERA", `VISUAL LOCK: ${held.join(" / ")}. Feed pressure temporarily reduced.`, "error");
+            this.engine.ai("Keep looking. It hates being made into footage.", "panic");
             summary.kinds.forEach((kind) => this.engine.lore.unlock(kind, true));
             this.engine.changeStat("sanity", -6);
             this.engine.changeStat("dread", 8);
+            this.engine.audio.play("ghostApproach", { volume: 0.32, rate: 0.72 });
         } else {
+            this.engine.log("CAMERA", "No body in frame. That does not mean the room is empty.", "system");
             this.engine.changeStat("sanity", 2);
         }
     }

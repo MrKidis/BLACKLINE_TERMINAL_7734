@@ -7,6 +7,7 @@ export class AudioEngine {
         this.samples = new Map();
         this.loops = new Map();
         this.ambienceResumeTimer = null;
+        this.scareTimers = [];
     }
 
     async unlock() {
@@ -91,22 +92,28 @@ export class AudioEngine {
 
     playScare(type, duration = 1400) {
         this.pauseAmbienceForScare(duration);
+        this.scareTimers.forEach((timer) => window.clearTimeout(timer));
+        this.scareTimers = [];
+        const schedule = (delay, key, options) => {
+            const timer = window.setTimeout(() => this.play(key, options), delay);
+            this.scareTimers.push(timer);
+        };
 
         if (type === "operator") {
-            this.play("phoneRing", { volume: 0.95, rate: 0.72 });
-            window.setTimeout(() => this.play("operatorJump", { volume: 1, rate: 0.92 }), 260);
-            window.setTimeout(() => this.play("ghostApproach", { volume: 0.6, rate: 0.78 }), 560);
+            this.play("phoneRing", { volume: 0.78, rate: 0.68 });
+            schedule(160, "operatorJump", { volume: 1, rate: 0.88 });
+            schedule(500, "ghostApproach", { volume: 0.48, rate: 0.72 });
             return;
         }
 
         if (type === "shaft") {
-            this.play("operatorJump", { volume: 1, rate: 0.64 });
-            window.setTimeout(() => this.play("watcherJump", { volume: 1, rate: 0.84 }), 420);
+            this.play("operatorJump", { volume: 0.94, rate: 0.58 });
+            schedule(260, "watcherJump", { volume: 1, rate: 0.78 });
             return;
         }
 
-        this.play("ghostApproach", { volume: 0.84, rate: 1.08 });
-        window.setTimeout(() => this.play("watcherJump", { volume: 1, rate: 1 }), 210);
+        this.play("ghostApproach", { volume: 0.78, rate: 1.02 });
+        schedule(170, "watcherJump", { volume: 1, rate: 0.96 });
     }
 
     tick() {

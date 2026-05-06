@@ -28,16 +28,16 @@ export class SpeechDirector {
     }
 
     getBritishGoogleVoices() {
-        return this.voices.filter((voice) => {
+        const googleUkVoices = this.voices.filter((voice) => {
             const name = voice.name.toLowerCase();
             const lang = voice.lang.toLowerCase();
             return name.includes("google") && (lang === "en-gb" || name.includes("uk english") || name.includes("british"));
         });
+        return googleUkVoices.filter((voice) => /\bmale\b/i.test(voice.name));
     }
 
     pickBritishGoogleVoice() {
-        return this.targetVoices.find((voice) => /female/i.test(voice.name))
-            || this.targetVoices.find((voice) => /google uk english/i.test(voice.name))
+        return this.targetVoices.find((voice) => /google uk english male/i.test(voice.name))
             || this.targetVoices[0]
             || null;
     }
@@ -74,8 +74,8 @@ export class SpeechDirector {
         }
         utterance.lang = "en-GB";
         utterance.volume = mood === "whisper" ? 0.76 : 0.96;
-        utterance.pitch = mood === "scare" ? 0.28 : mood === "panic" ? 0.38 : mood === "whisper" ? 0.46 : 0.56;
-        utterance.rate = mood === "panic" ? 1.05 : mood === "whisper" ? 0.72 : mood === "scare" ? 0.64 : 0.84;
+        utterance.pitch = mood === "scare" ? 0.18 : mood === "panic" ? 0.28 : mood === "whisper" ? 0.34 : 0.42;
+        utterance.rate = mood === "panic" ? 0.92 : mood === "whisper" ? 0.68 : mood === "scare" ? 0.56 : 0.78;
         this.synth.speak(utterance);
     }
 

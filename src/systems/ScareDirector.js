@@ -54,24 +54,32 @@ export class ScareDirector {
         const w = window.innerWidth;
         const h = window.innerHeight;
         const ctx = this.ctx;
-        const jitter = () => (Math.random() - 0.5) * 28 * (1 - progress);
+        const lunge = this.easeOut(Math.max(0, (progress - 0.13) / 0.87));
+        const impactPulse = progress > 0.12 && progress < 0.28 ? 1 : 0;
+        const jitter = () => (Math.random() - 0.5) * (18 + lunge * 46 + impactPulse * 38);
 
-        ctx.fillStyle = progress < 0.08 ? "#f8fff8" : "#050000";
+        ctx.fillStyle = progress < 0.05 ? "#f8fff8" : progress < 0.13 ? "#090909" : "#050000";
         ctx.fillRect(0, 0, w, h);
 
-        for (let i = 0; i < 180; i += 1) {
-            ctx.fillStyle = `rgba(${90 + Math.random() * 165}, ${Math.random() * 28}, ${Math.random() * 28}, ${Math.random() * 0.44})`;
-            ctx.fillRect(Math.random() * w, Math.random() * h, 8 + Math.random() * 180, 1 + Math.random() * 7);
+        for (let i = 0; i < 240; i += 1) {
+            ctx.fillStyle = `rgba(${105 + Math.random() * 150}, ${Math.random() * 34}, ${Math.random() * 28}, ${Math.random() * (0.24 + lunge * 0.42)})`;
+            ctx.fillRect(Math.random() * w + jitter() * 0.4, Math.random() * h, 8 + Math.random() * 240, 1 + Math.random() * 9);
         }
 
         this.drawScanlines(ctx, w, h, progress);
+        this.drawLensDamage(ctx, w, h, lunge);
 
         if (type === "operator") {
-            this.drawOperator(ctx, w, h, jitter, progress);
+            this.drawOperator(ctx, w, h, jitter, progress, lunge);
         } else if (type === "shaft") {
-            this.drawShaft(ctx, w, h, jitter, progress);
+            this.drawShaft(ctx, w, h, jitter, progress, lunge);
         } else {
-            this.drawWatcher(ctx, w, h, jitter, progress);
+            this.drawWatcher(ctx, w, h, jitter, progress, lunge);
+        }
+
+        if (progress > 0.78) {
+            ctx.fillStyle = `rgba(255, 255, 255, ${(progress - 0.78) * 1.8})`;
+            ctx.fillRect(0, 0, w, h);
         }
     }
 
@@ -87,11 +95,29 @@ export class ScareDirector {
         ctx.restore();
     }
 
-    drawWatcher(ctx, w, h, jitter, progress) {
+    drawLensDamage(ctx, w, h, intensity) {
+        ctx.save();
+        ctx.globalCompositeOperation = "screen";
+        ctx.strokeStyle = `rgba(255, 255, 255, ${0.06 + intensity * 0.16})`;
+        ctx.lineWidth = 1 + intensity * 3;
+        for (let i = 0; i < 9; i += 1) {
+            const startX = w * (0.12 + Math.random() * 0.76);
+            const startY = h * (0.1 + Math.random() * 0.78);
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            ctx.lineTo(startX + (Math.random() - 0.5) * w * 0.32, startY + (Math.random() - 0.5) * h * 0.24);
+            ctx.stroke();
+        }
+        ctx.fillStyle = `rgba(255, 0, 0, ${0.04 + intensity * 0.1})`;
+        ctx.fillRect(0, h * (0.08 + Math.random() * 0.8), w, 2 + intensity * 9);
+        ctx.restore();
+    }
+
+    drawWatcher(ctx, w, h, jitter, progress, lunge) {
         const scale = Math.min(w, h) / 520;
         ctx.save();
-        ctx.translate(w / 2 + jitter(), h / 2 + jitter());
-        ctx.scale(scale * (1.4 + progress * 1.2), scale * (1.4 + progress * 1.2));
+        ctx.translate(w / 2 + jitter(), h * (0.5 + lunge * 0.04) + jitter());
+        ctx.scale(scale * (1.35 + lunge * 2.35), scale * (1.35 + lunge * 2.35));
         ctx.fillStyle = "#000";
         ctx.beginPath();
         ctx.ellipse(0, -16, 128, 198, 0, 0, Math.PI * 2);
@@ -108,21 +134,24 @@ export class ScareDirector {
         ctx.ellipse(-52, -58, 7, 30, 0, 0, Math.PI * 2);
         ctx.ellipse(52, -58, 7, 30, 0, 0, Math.PI * 2);
         ctx.fill();
+        ctx.fillStyle = `rgba(255, 0, 0, ${0.45 + lunge * 0.45})`;
+        ctx.fillRect(-83, -86, 62, 6 + lunge * 11);
+        ctx.fillRect(21, -86, 62, 6 + lunge * 11);
         ctx.strokeStyle = "#fff";
-        ctx.lineWidth = 11;
-        for (let i = 0; i < 4; i += 1) {
+        ctx.lineWidth = 8;
+        for (let i = 0; i < 7; i += 1) {
             ctx.beginPath();
-            ctx.moveTo(-72 + i * 8, 54 + i * 5);
-            ctx.quadraticCurveTo(0, 168 + Math.random() * 36, 72 - i * 8, 54 + i * 5);
+            ctx.moveTo(-82 + i * 12, 48 + i * 3);
+            ctx.quadraticCurveTo(-18 + jitter() * 0.3, 126 + Math.random() * 44, -30 + i * 12, 96 + i * 6);
             ctx.stroke();
         }
         ctx.restore();
     }
 
-    drawOperator(ctx, w, h, jitter, progress) {
+    drawOperator(ctx, w, h, jitter, progress, lunge) {
         ctx.save();
-        ctx.translate(w * 0.5 + jitter(), h * (0.4 + progress * 0.22));
-        ctx.scale(1 + progress * 0.7, 1 + progress * 0.7);
+        ctx.translate(w * 0.5 + jitter(), h * (0.36 + lunge * 0.24));
+        ctx.scale(0.94 + lunge * 1.22, 0.94 + lunge * 1.22);
         ctx.fillStyle = "#0b0000";
         ctx.fillRect(-w * 0.28, -h * 0.28, w * 0.56, h * 0.68);
         ctx.strokeStyle = "rgba(255, 255, 255, 0.9)";
@@ -139,6 +168,12 @@ export class ScareDirector {
         ctx.fillStyle = "#000";
         ctx.fillRect(-78, -52, 14, 58);
         ctx.fillRect(62, -52, 14, 58);
+        ctx.strokeStyle = `rgba(255, 0, 0, ${0.55 + lunge * 0.35})`;
+        ctx.lineWidth = 5 + lunge * 6;
+        ctx.beginPath();
+        ctx.arc(-68, -24, 44 + lunge * 16, 0, Math.PI * 2);
+        ctx.arc(68, -24, 44 + lunge * 16, 0, Math.PI * 2);
+        ctx.stroke();
         ctx.strokeStyle = "#fff";
         ctx.lineWidth = 9;
         ctx.beginPath();
@@ -151,16 +186,16 @@ export class ScareDirector {
         ctx.restore();
     }
 
-    drawShaft(ctx, w, h, jitter, progress) {
+    drawShaft(ctx, w, h, jitter, progress, lunge) {
         ctx.save();
-        const left = w * (0.08 - progress * 0.18);
-        const right = w * (0.92 + progress * 0.18);
+        const left = w * (0.1 - lunge * 0.24);
+        const right = w * (0.9 + lunge * 0.24);
         ctx.fillStyle = "#151515";
         ctx.fillRect(0, 0, left, h);
         ctx.fillRect(right, 0, w - right, h);
         ctx.fillStyle = "#010000";
         ctx.beginPath();
-        ctx.ellipse(w / 2 + jitter(), h * 0.52 + jitter(), w * (0.18 + progress * 0.34), h * (0.48 + progress * 0.28), 0, 0, Math.PI * 2);
+        ctx.ellipse(w / 2 + jitter(), h * 0.52 + jitter(), w * (0.18 + lunge * 0.42), h * (0.48 + lunge * 0.34), 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.strokeStyle = "rgba(255,255,255,0.16)";
         ctx.lineWidth = 18;
@@ -171,6 +206,19 @@ export class ScareDirector {
         ctx.fillStyle = "#090000";
         ctx.fillRect(w / 2 - 46 + jitter(), h * 0.38, 10, 62);
         ctx.fillRect(w / 2 + 36 + jitter(), h * 0.38, 10, 62);
+        ctx.strokeStyle = `rgba(255, 255, 255, ${0.16 + lunge * 0.4})`;
+        ctx.lineWidth = 4;
+        for (let y = h * 0.24; y < h * 0.82; y += 34) {
+            ctx.beginPath();
+            ctx.moveTo(w * 0.3 + jitter(), y);
+            ctx.lineTo(w * 0.7 + jitter(), y + lunge * 26);
+            ctx.stroke();
+        }
         ctx.restore();
+    }
+
+    easeOut(value) {
+        const clamped = Math.max(0, Math.min(1, value));
+        return 1 - Math.pow(1 - clamped, 3);
     }
 }

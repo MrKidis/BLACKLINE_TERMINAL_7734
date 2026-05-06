@@ -56,10 +56,10 @@
 
             <section class="ops-block">
                 <h2>Audio</h2>
-                <label class="toggle-line"><input id="tts-toggle" type="checkbox" checked> Scary TTS</label>
+                <label class="toggle-line"><input id="tts-toggle" type="checkbox" checked> Male UK TTS</label>
                 <label class="toggle-line"><input id="ambience-toggle" type="checkbox" checked> Real ambience</label>
                 <select id="voice-select" class="voice-select" aria-label="TTS voice"></select>
-                <small id="voice-status">Looking for Google British English voice.</small>
+                <small id="voice-status">Looking for Google British English male voice.</small>
             </section>
         </aside>
 
@@ -69,8 +69,11 @@
                 <span id="entity-label">NO MOTION</span>
             </header>
             <div id="camera-feed" class="camera-feed">
+                <div id="camera-room" class="camera-room" aria-hidden="true"></div>
+                <div id="camera-entities" class="camera-entities" aria-hidden="true"></div>
+                <div id="camera-status" class="camera-status">REC-BAY / SIGNAL CLEAN</div>
+                <div class="camera-reticle" aria-hidden="true"></div>
                 <div class="camera-static"></div>
-                <div id="camera-ghost" class="camera-ghost"></div>
                 <pre id="camera-text">NO CAMERA SELECTED</pre>
             </div>
             <div id="inventory-list" class="inventory-list"></div>
