@@ -36,11 +36,3 @@ http://127.0.0.1:8787/index.html
 - `src/ui/TerminalUI.js` renders the terminal, HUD, camera feed, objectives, and voice controls.
 - `docs/AUDIO_CREDITS.md` documents every bundled audio source and license.
 
-## GitHub
-
-This local checkout currently has no remote configured. Add a remote for `BLACKLINE_TERMINAL_7734`, then push:
-
-```powershell
-git remote add origin https://github.com/<owner>/BLACKLINE_TERMINAL_7734.git
-git push -u origin master
-```
