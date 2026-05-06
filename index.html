@@ -29,32 +29,35 @@
             </header>
 
             <div id="office-view" class="office-view" data-left-door="open" data-right-door="open">
-                <div class="office-backwall"></div>
-                <div class="office-ceiling"></div>
-                <div class="office-floor"></div>
+                <div id="office-world" class="office-world">
+                    <div class="office-backwall"></div>
+                    <div class="office-ceiling"></div>
+                    <div class="office-floor"></div>
 
-                <div class="hall hall-left">
-                    <div class="hall-light"></div>
-                    <div id="left-threat" class="office-threat watcher" aria-hidden="true"></div>
-                    <div id="left-door" class="security-door left"></div>
-                </div>
-
-                <div class="hall hall-right">
-                    <div class="hall-light"></div>
-                    <div id="right-threat" class="office-threat operator" aria-hidden="true"></div>
-                    <div id="right-door" class="security-door right"></div>
-                </div>
-
-                <div class="office-desk">
-                    <div class="desk-monitor">
-                        <span id="camera-label">CAM_00</span>
-                        <small id="entity-label">NO MOTION</small>
+                    <div class="hall hall-left">
+                        <div class="hall-light"></div>
+                        <div id="left-threat" class="office-threat watcher" aria-hidden="true"></div>
+                        <div id="left-door" class="security-door left"></div>
                     </div>
-                    <div class="desk-fan"></div>
-                    <div class="desk-phone"></div>
+
+                    <div class="hall hall-right">
+                        <div class="hall-light"></div>
+                        <div id="right-threat" class="office-threat operator" aria-hidden="true"></div>
+                        <div id="right-door" class="security-door right"></div>
+                    </div>
+
+                    <div class="office-desk">
+                        <div class="desk-monitor">
+                            <span id="camera-label">CAM_00</span>
+                            <small id="entity-label">NO MOTION</small>
+                        </div>
+                        <div class="desk-fan"></div>
+                        <div class="desk-phone"></div>
+                    </div>
+
+                    <div id="center-threat" class="office-threat shaft" aria-hidden="true"></div>
                 </div>
 
-                <div id="center-threat" class="office-threat shaft" aria-hidden="true"></div>
                 <div id="office-warning" class="office-warning">QUIET</div>
             </div>
 
@@ -65,6 +68,9 @@
                 <button id="right-light-button" type="button" class="control-button light-control">RIGHT LIGHT</button>
                 <button id="right-door-button" type="button" class="control-button door-control">RIGHT DOOR</button>
             </div>
+            <button id="monitor-hotspot" type="button" class="monitor-hotspot" aria-label="Flip camera monitor">
+                <span id="monitor-hotspot-label">CAMERA MONITOR</span>
+            </button>
         </section>
 
         <section id="camera-panel" class="camera-panel" aria-label="Camera tablet">

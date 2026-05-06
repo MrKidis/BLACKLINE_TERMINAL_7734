@@ -140,6 +140,9 @@ export class GameEngine {
     }
 
     setCamera(cameraId) {
+        if (this.state.dead || this.state.escaped) {
+            return false;
+        }
         if (!this.cameras[cameraId]) {
             return false;
         }
@@ -159,6 +162,9 @@ export class GameEngine {
     }
 
     toggleCamera(force) {
+        if (this.state.dead || this.state.escaped) {
+            return;
+        }
         this.state.cameraOpen = typeof force === "boolean" ? force : !this.state.cameraOpen;
         this.audio.play("clockTick", { volume: 0.26, rate: this.state.cameraOpen ? 0.65 : 1.4 });
         if (this.state.cameraOpen) {
@@ -172,6 +178,9 @@ export class GameEngine {
     }
 
     toggleDoor(side) {
+        if (!this.state.running || this.state.dead || this.state.escaped) {
+            return;
+        }
         const key = side === "left" ? "leftDoorClosed" : "rightDoorClosed";
         this.state[key] = !this.state[key];
         this.state.flags.add("usedDefenses");
@@ -181,6 +190,9 @@ export class GameEngine {
     }
 
     toggleLight(side) {
+        if (!this.state.running || this.state.dead || this.state.escaped) {
+            return;
+        }
         const key = side === "left" ? "leftLightOn" : "rightLightOn";
         this.state[key] = !this.state[key];
         this.state.flags.add("usedDefenses");

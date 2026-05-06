@@ -33,7 +33,8 @@ https://mrkidis.github.io/BLACKLINE_TERMINAL_7734/
 ## Core Loop
 
 - Survive from 12 AM to 6 AM.
-- Use `Space` to raise/lower the camera tablet.
+- Move the mouse to the bottom monitor tab or press `Space` to raise/lower the camera tablet.
+- Move the mouse left/right in the office to pan toward each hall.
 - Use `1`-`5` or the camera buttons to switch feeds.
 - Use `A`/`D` for left/right doors and `Q`/`E` for left/right hall lights.
 - Cameras can stall entities briefly; doors stop hallway attacks; every defense drains power.

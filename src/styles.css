@@ -146,12 +146,37 @@ select:hover {
     position: relative;
     min-height: 0;
     overflow: hidden;
+    --office-pan: 0px;
     background:
         radial-gradient(circle at 50% 45%, rgba(239, 255, 246, 0.08), transparent 18%),
         linear-gradient(90deg, rgba(7, 20, 18, 0.9), transparent 20%, transparent 80%, rgba(7, 13, 20, 0.9)),
         #020303;
     perspective: 900px;
     transition: filter 120ms ease;
+}
+
+.office-world {
+    position: absolute;
+    inset: 0;
+    width: 114%;
+    left: -7%;
+    transform: translateX(var(--office-pan));
+    transition: transform 80ms linear;
+    will-change: transform;
+}
+
+.office-view[data-look="left"] {
+    background:
+        radial-gradient(circle at 10% 44%, rgba(127, 233, 255, 0.12), transparent 20%),
+        linear-gradient(90deg, rgba(7, 20, 18, 0.98), transparent 26%, transparent 80%, rgba(7, 13, 20, 0.88)),
+        #020303;
+}
+
+.office-view[data-look="right"] {
+    background:
+        radial-gradient(circle at 90% 44%, rgba(127, 233, 255, 0.12), transparent 20%),
+        linear-gradient(90deg, rgba(7, 20, 18, 0.88), transparent 20%, transparent 74%, rgba(7, 13, 20, 0.98)),
+        #020303;
 }
 
 .office-view[data-camera="open"] {
@@ -461,6 +486,54 @@ select:hover {
 .camera-toggle.active {
     border-color: var(--amber);
     background: rgba(231, 176, 74, 0.18);
+}
+
+.monitor-hotspot {
+    position: absolute;
+    left: 50%;
+    bottom: 72px;
+    z-index: 90;
+    width: min(310px, 38vw);
+    min-width: 184px;
+    height: 42px;
+    transform: translateX(-50%);
+    border: 1px solid rgba(127, 233, 255, 0.18);
+    border-radius: 4px 4px 0 0;
+    color: rgba(127, 233, 255, 0.72);
+    background:
+        linear-gradient(180deg, rgba(127, 233, 255, 0.08), rgba(0, 0, 0, 0.84)),
+        rgba(0, 0, 0, 0.66);
+    box-shadow: 0 -12px 34px rgba(0, 0, 0, 0.7), inset 0 0 26px rgba(127, 233, 255, 0.04);
+    opacity: 0.74;
+}
+
+.monitor-hotspot::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 7px;
+    width: 64px;
+    height: 4px;
+    transform: translateX(-50%);
+    background: rgba(127, 233, 255, 0.36);
+    box-shadow: 0 0 16px rgba(127, 233, 255, 0.28);
+}
+
+.monitor-hotspot span {
+    position: relative;
+    top: 9px;
+    font-size: 11px;
+    letter-spacing: 0;
+}
+
+.monitor-hotspot:hover,
+.monitor-hotspot.active {
+    opacity: 1;
+    color: var(--white);
+    border-color: rgba(231, 176, 74, 0.46);
+    background:
+        linear-gradient(180deg, rgba(231, 176, 74, 0.13), rgba(0, 0, 0, 0.86)),
+        rgba(0, 0, 0, 0.78);
 }
 
 .status-dock {

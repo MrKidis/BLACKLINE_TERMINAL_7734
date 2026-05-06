@@ -33,6 +33,7 @@ const selectors = {
     diagnosticsToggle: "#diagnostics-toggle",
     diagnosticsPanel: "#diagnostics-panel",
     office: "#office-view",
+    officeWorld: "#office-world",
     officeWarning: "#office-warning",
     leftDoor: "#left-door",
     rightDoor: "#right-door",
@@ -44,6 +45,8 @@ const selectors = {
     leftLightButton: "#left-light-button",
     rightLightButton: "#right-light-button",
     cameraToggle: "#camera-toggle-button",
+    monitorHotspot: "#monitor-hotspot",
+    monitorHotspotLabel: "#monitor-hotspot-label",
     cameraClose: "#camera-close-button",
     cameraPanel: "#camera-panel",
     cameraLabel: "#camera-label",
@@ -65,6 +68,7 @@ export class TerminalUI {
         this.historyIndex = 0;
         this.voiceSignature = "";
         this.cameraMapBuilt = false;
+        this.lastMonitorFlipAt = 0;
     }
 
     bind() {
@@ -76,9 +80,16 @@ export class TerminalUI {
         this.els.rightLightButton.addEventListener("click", () => this.engine.toggleLight("right"));
         this.els.cameraToggle.addEventListener("click", () => this.engine.toggleCamera());
         this.els.cameraClose.addEventListener("click", () => this.engine.toggleCamera(false));
+        this.els.monitorHotspot.addEventListener("pointerenter", () => this.flipMonitorFromHotspot());
+        this.els.monitorHotspot.addEventListener("pointerdown", (event) => {
+            event.preventDefault();
+            this.flipMonitorFromHotspot();
+        });
         this.els.diagnosticsToggle.addEventListener("click", () => {
             this.els.diagnosticsPanel.classList.toggle("open");
         });
+        this.els.office.addEventListener("pointermove", (event) => this.updateLookFromPointer(event));
+        this.els.office.addEventListener("pointerleave", () => this.setOfficeLook(0, "center"));
 
         this.els.form.addEventListener("submit", (event) => {
             event.preventDefault();
@@ -269,6 +280,38 @@ export class TerminalUI {
         }
     }
 
+    flipMonitorFromHotspot() {
+        const state = this.engine.state;
+        if (!state.running || state.dead || state.escaped) {
+            return;
+        }
+
+        const now = performance.now();
+        if (now - this.lastMonitorFlipAt < 520) {
+            return;
+        }
+
+        this.lastMonitorFlipAt = now;
+        this.engine.toggleCamera(!state.cameraOpen);
+    }
+
+    updateLookFromPointer(event) {
+        if (this.engine.state.cameraOpen) {
+            return;
+        }
+
+        const rect = this.els.office.getBoundingClientRect();
+        const ratio = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width));
+        const pan = (0.5 - ratio) * 96;
+        const zone = ratio < 0.28 ? "left" : ratio > 0.72 ? "right" : "center";
+        this.setOfficeLook(pan, zone);
+    }
+
+    setOfficeLook(pan, zone) {
+        this.els.office.style.setProperty("--office-pan", `${pan.toFixed(1)}px`);
+        this.els.office.dataset.look = zone;
+    }
+
     renderMap() {
         if (!this.cameraMapBuilt) {
             this.els.map.innerHTML = "";
@@ -348,6 +391,8 @@ export class TerminalUI {
         this.els.leftLightButton.classList.toggle("active", s.leftLightOn);
         this.els.rightLightButton.classList.toggle("active", s.rightLightOn);
         this.els.cameraToggle.classList.toggle("active", s.cameraOpen);
+        this.els.monitorHotspot.classList.toggle("active", s.cameraOpen);
+        this.els.monitorHotspotLabel.textContent = s.cameraOpen ? "LOWER MONITOR" : "CAMERA MONITOR";
 
         this.els.leftThreat.classList.toggle("visible", leftVisible);
         this.els.rightThreat.classList.toggle("visible", rightVisible && Boolean(rightThreat));
